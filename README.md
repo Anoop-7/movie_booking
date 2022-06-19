@@ -39,6 +39,10 @@ pg_dump -U postgres movie_booking < "path_of_dump_file"
 ```
 npm run devStart
 ```
+>Postman API Collection
+>Import Movie Booking.postman_collection.json in postman 
+>Authorization is set as Bearer in global scope update for other user roles if necessary
+
 >Use the postman API collection to test API's
 - create user
 - login
