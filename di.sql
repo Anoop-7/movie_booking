@@ -64,7 +64,6 @@ INSERT INTO screenings(start_time,screen_id,movie_id,price) values('2022-06-19 1
 INSERT INTO screenings(start_time,screen_id,movie_id,price) values('2022-06-19 13:15:00',2,7,650);
 
 
-
 select SUM(no_of_seats) AS "booked_seats"
 from tickets
 where screening_id= req.body.screening_id
@@ -74,5 +73,5 @@ select th.name, sc.name, scr.start_time, scr.price
 from theatres as th, screens as sc, screenings as scr
 where scr.movie_id=7 and th.id = sc.theatre_id and sc.id = scr.screen_id;
 
-
+select date_part('month',t.creation_date) as months, sum(t.no_of_seats*s.price) as summaryProfits from tickets as t,screenings as s where t.status = 'booked' and t.screening_id = s.id and t.creation_date between '2022-04-01'::timestamp and '2022-06-29'::timestamp group by date_part('month',t.creation_date);
 

@@ -12,66 +12,9 @@ const sequelize = new Sequelize('movie_booking', 'postgres', '12345678', {
 });
 
 
-
 app.listen(3000)
 //our app can handle json authentication
 app.use(express.json())
-
-function print_now(s){
-    console.log(s)
-}
-
-const User = sequelize.define(
-    "users",
-    {
-        name: Sequelize.STRING,
-        password: Sequelize.STRING,
-        role: Sequelize.STRING,
-    },
-    {
-        timestamps: false,
-    }
-    );
-
-app.get('/users', (req, res) => {
-    res.json(users)
-})
-
-app.post('/users', async (req, res) => {
-    try {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10)
-        const create_user = await pool.query("INSERT INTO users(name,password,role) values($1,$2,$3) returning *", [req.body.name,hashedPassword,req.body.role]);
-        res.status(201).json(create_user)
-    } catch(error) {
-        console.log(error)
-        res.status(500).send()
-    }
-})
-
-app.post('/users/login', async (req, res) => {
-    const user = await User.findOne({
-        where: { name:req.body.name},
-    });
-    if (user == null) {
-        return res.status(400).send('Cannot find user')
-    }
-    try {
-        if(await bcrypt.compare(req.body.password,  user.password)) {
-        // if(req.body.password == user.password) {
-            console.log("DONE");
-            const accessToken = jwt.sign(user.name, process.env.ACCESS_TOKEN_SECRET)
-            console.log(accessToken)
-            res.send({accessToken : accessToken})
-        } else {
-            res.send({ message: "Incorrect Password!"})
-        }
-    } catch (error){
-        console.log(error);
-        res.status(500).json(error)
-    }
-})
-//login auth for users
-
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -93,6 +36,56 @@ function authenticateToken(req, res, next) {
         next()
     })
 }
+const User = sequelize.define(
+    "users",
+    {
+        name: Sequelize.STRING,
+        password: Sequelize.STRING,
+        role: Sequelize.STRING,
+    },
+    {
+        timestamps: false,
+    }
+);
+
+app.get('/users', async(req, res) => {
+    try {
+        const user = await User.findAll({
+        });
+        res.json(user)
+    } catch (error) {
+        res.json(error)
+    }
+})
+
+app.post('/create-user', async (req, res) => {
+    try {
+        const hashedPassword = await bcrypt.hash(req.body.password, 10)
+        const create_user = await pool.query("INSERT INTO users(name,password,role) values($1,$2,$3) returning *", [req.body.name,hashedPassword,req.body.role]);
+        res.status(201).json(create_user)
+    } catch(error) {
+        res.json(error)
+    }
+})
+
+app.post('/users/login', async (req, res) => {
+    const user = await User.findOne({
+        where: { name:req.body.name},
+    });
+    if (user == null) {
+        return res.status(400).send('Cannot find user')
+    }
+    try {
+        if(await bcrypt.compare(req.body.password,  user.password)) {
+            const accessToken = jwt.sign(user.name, process.env.ACCESS_TOKEN_SECRET)
+            res.send({accessToken : accessToken})
+        } else {
+            res.send({ message: "Incorrect Password!"})
+        }
+    } catch (error){
+        res.status(500).json(error)
+    }
+})
 
 app.get('/all-movies', authenticateToken, async (req, res) => {
     try {
@@ -120,7 +113,7 @@ app.post('/book-ticket', authenticateToken, async(req, res) =>{
         const available_seats= capacity.rows[0]["capacity"]-booked_seats.rows[0]["no_of_seats"]
         if(available_seats>=req.body.no_of_seats){
             const book_ticket = await pool.query("INSERT INTO tickets(creation_date,user_id,screening_id,no_of_seats,status) values($1,$2,$3,$4,$5) returning *", [req.body.creation_date,req.user.id,req.body.screening_id,req.body.no_of_seats,"booked"]);
-            res.json(book_ticket.rows[0]['id']);
+            res.json({message : "Ticket booked successfully",ticket_id : book_ticket.rows[0]['id']});
         }
         else{
             res.json("Sorry! requested seats not available!")
@@ -130,9 +123,9 @@ app.post('/book-ticket', authenticateToken, async(req, res) =>{
     }
 })
 
-app.post('/update-booking',authenticateToken, async(req, res) =>{
+app.post('/cancel-booking',authenticateToken, async(req, res) =>{
     try {
-        const update_booking = await pool.query("update tickets set status = $1 where id = $2", ["cancelled", req.body.booking_id]);
+        const cancel_booking = await pool.query("update tickets set status = $1 where id = $2", ["cancelled", req.body.booking_id]);
         res.status(200).json("Tickets cancelled successfully!")
     } catch (error) {
         res.json(error.message);
@@ -141,7 +134,6 @@ app.post('/update-booking',authenticateToken, async(req, res) =>{
 
 app.post('/add-show-timing',authenticateToken, async(req, res) =>{
     try {
-        console.log(req.is_admin)
         if (req.is_admin)
         {
             const add_screenings = await pool.query("INSERT INTO screenings(start_time,screen_id,movie_id,price) values($1,$2,$3,$4) returning *", [req.body.start_time,req.body.screen_id,req.body.movie_id,req.body.price]);
@@ -153,4 +145,38 @@ app.post('/add-show-timing',authenticateToken, async(req, res) =>{
     }
 })
 
+app.post('/analytics/visited', authenticateToken, async(req,res) =>{
+    try {
+        const method_name = req.query['method']
+        if (method_name == "db-aggregation"){
+            const visitors = await pool.query("select date_part('month',creation_date) as months, sum(no_of_seats) as summaryVisits from tickets where status = $1 and creation_date between $2::timestamp and $3::timestamp group by date_part('month',creation_date);",['booked',req.body.from,req.body.to])
+            return res.json(visitors.rows)
+        }
+        else if (method_name == "js-algorithm"){
+            return res.json("please try db-aggregation")
+        }
+        else{
+            return res.json("invalid method")
+        }
+    } catch (error) {
+        res.json(error.message);
+    }
+})
 
+app.post('/analytics/profits', authenticateToken, async(req,res) =>{
+    try {
+        const method_name = req.query['method']
+        if (method_name == "db-aggregation"){
+            const profits = await pool.query("select date_part('month',t.creation_date) as months, sum(t.no_of_seats*s.price) as summaryProfits from tickets as t,screenings as s where t.status = $1 and t.screening_id = s.id and t.creation_date between $2::timestamp and $3::timestamp group by date_part('month',t.creation_date);",['booked',req.body.from,req.body.to])
+            return res.json(profits.rows)
+        }
+        else if (method_name == "js-algorithm"){
+            return res.json("please try db-aggregation")
+        }
+        else{
+            return res.json("invalid method")
+        }
+    } catch (error) {
+        res.json(error.message);
+    }
+})

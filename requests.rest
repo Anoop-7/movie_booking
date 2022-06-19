@@ -3,12 +3,14 @@ GET http://localhost:3000/users
 //returns all users
 ###
 
-POST http://localhost:3000/users
+POST http://localhost:3000/create-user
 //create user | params name, password
 Content-Type: application/json
 
 {
-"name": "Palu", "password": "password", "role": "user"
+    "name": "Palu",
+    "password": "password",
+    "role": "user"
 }
 
 ###
@@ -18,7 +20,8 @@ POST http://localhost:3000/users/login
 Content-Type: application/json
 
 {
-"name": "John", "password": "password"
+    "name": "John",
+    "password": "password"
 }
 
 
@@ -37,11 +40,12 @@ POST http://localhost:3000/users/login
 Content-Type: application/json
 
 {
-"name": "Kyle", "password": "passord"
+"name": "Palu", "password": "passord"
 }
 
 ###
 GET http://localhost:3000/all-movies
+//Fetch all movies
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.TGF1cmE.WkXLF6v-RXZDNRFhxODGRTVhUgvFRUBcOALnkKCPNZ4
 
 
@@ -70,20 +74,20 @@ Content-Type: application/json
 
 
 ###
-POST http://localhost:3000/update-booking
+POST http://localhost:3000/cancel-booking
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.TGF1cmE.WkXLF6v-RXZDNRFhxODGRTVhUgvFRUBcOALnkKCPNZ4
 Content-Type: application/json
-//choose screening id from show-timings id to enter below
+//cancel booking by passing ticket_id
 
 {
-    "booking_id" : 27
+    "booking_id" : 29
 }
 
 ###
 POST http://localhost:3000/add-show-timing
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.Sm9obg.XbUne8MJpN4pmL-Wu7CTBNGlpT1IHAfaspKeEWodyqs
 Content-Type: application/json
-//choose screening id from show-timings id to enter below
+//admin: choose screening id from show-timings id to enter below
 
 {
     "start_time": "2022-06-19 09:15:00",
@@ -92,9 +96,25 @@ Content-Type: application/json
     "price": 320
 }
 
+###
+POST http://localhost:3000/analytics/visited?method=db-aggregation
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.Sm9obg.XbUne8MJpN4pmL-Wu7CTBNGlpT1IHAfaspKeEWodyqs
+Content-Type: application/json
 
+{
+    "from": "2022-04-01",
+    "to": "2022-06-29"
+}
 
+###
+POST http://localhost:3000/analytics/profits?method=db-aggregation
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.Sm9obg.XbUne8MJpN4pmL-Wu7CTBNGlpT1IHAfaspKeEWodyqs
+Content-Type: application/json
 
+{
+    "from": "2022-04-01",
+    "to": "2022-06-29"
+}
 
 
 
