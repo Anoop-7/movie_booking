@@ -48,4 +48,7 @@ npm run devStart
 - login
 - use token received after login as bearer tokens for API's as token authentication wherever indicated in the postman collection
 
-
+> If using VS Code editor, can install an extention "REST Client". REST Client allows you to send HTTP request and view the response in Visual Studio Code directly.
+- install "REST Client"
+- open file "request.rest"
+- you cand find "send requests" above every HTTP request, click on it to make the call, see response in the response window that pops up.
