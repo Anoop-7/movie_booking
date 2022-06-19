@@ -62,7 +62,7 @@ app.post('/create-user', async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
         const create_user = await pool.query("INSERT INTO users(name,password,role) values($1,$2,$3) returning *", [req.body.name,hashedPassword,req.body.role]);
-        res.status(201).json(create_user)
+        res.status(201).json(create_user.rows)
     } catch(error) {
         res.json(error)
     }
