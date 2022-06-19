@@ -1,0 +1,120 @@
+
+GET http://localhost:3000/users
+//returns all users
+###
+
+POST http://localhost:3000/users
+//create user | params name, password
+Content-Type: application/json
+
+{
+"name": "Palu", "password": "password", "role": "user"
+}
+
+###
+
+POST http://localhost:3000/users/login
+//login and generate access token for the valid user
+Content-Type: application/json
+
+{
+"name": "John", "password": "password"
+}
+
+
+###
+POST http://localhost:3000/users/login
+//Test: User not found when name is Kye
+Content-Type: application/json
+
+{
+"name": "Kye", "password": "password"
+}
+
+###
+POST http://localhost:3000/users/login
+//Test: User sends wrong password
+Content-Type: application/json
+
+{
+"name": "Kyle", "password": "passord"
+}
+
+###
+GET http://localhost:3000/all-movies
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.TGF1cmE.WkXLF6v-RXZDNRFhxODGRTVhUgvFRUBcOALnkKCPNZ4
+
+
+###
+
+POST http://localhost:3000/show-timings
+//test: send the movie id to check the screening time of the movie
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.TGF1cmE.WkXLF6v-RXZDNRFhxODGRTVhUgvFRUBcOALnkKCPNZ4
+Content-Type: application/json
+
+{
+    "movie_id" : 7
+}
+
+###
+POST http://localhost:3000/book-ticket
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.TGF1cmE.WkXLF6v-RXZDNRFhxODGRTVhUgvFRUBcOALnkKCPNZ4
+Content-Type: application/json
+//choose screening id from show-timings id to enter below
+
+{
+    "creation_date" : "2022-04-13 13:15:00",
+    "screening_id" : 2,
+    "no_of_seats" : 3
+}
+
+
+###
+POST http://localhost:3000/update-booking
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.TGF1cmE.WkXLF6v-RXZDNRFhxODGRTVhUgvFRUBcOALnkKCPNZ4
+Content-Type: application/json
+//choose screening id from show-timings id to enter below
+
+{
+    "booking_id" : 27
+}
+
+###
+POST http://localhost:3000/add-show-timing
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.Sm9obg.XbUne8MJpN4pmL-Wu7CTBNGlpT1IHAfaspKeEWodyqs
+Content-Type: application/json
+//choose screening id from show-timings id to enter below
+
+{
+    "start_time": "2022-06-19 09:15:00",
+    "screen_id": 3,
+    "movie_id": 8,
+    "price": 320
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
